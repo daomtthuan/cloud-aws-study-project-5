@@ -85,14 +85,12 @@ export class BlogProvider {
       .update({
         TableName: this.tableName,
         Key: { userId, blogId },
-        UpdateExpression: 'set #nameKey = :nameValue, #contentKey = :contentValue',
+        UpdateExpression: 'set #nameKey = :nameValue',
         ExpressionAttributeNames: {
           '#nameKey': 'name',
-          '#contentKey': 'content',
         },
         ExpressionAttributeValues: {
           ':nameValue': blog.name,
-          '#contentValue': blog.content,
         },
       })
       .promise();
