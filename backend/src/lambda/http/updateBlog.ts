@@ -2,23 +2,23 @@ import 'source-map-support/register';
 
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { createAttachmentUrl } from '../../businessLogic/blog';
+import { updateBlog } from '../../businessLogic/blog';
+import { UpdateBlogRequest } from '../../requests/UpdateBlogRequest';
 import { getUserId } from '../utils';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   const blogId = event.pathParameters.blogId;
+  const updatedBlog: UpdateBlogRequest = JSON.parse(event.body);
 
   const userId = getUserId(event);
-  const url = await createAttachmentUrl(userId, blogId);
+  await updateBlog(blogId, userId, updatedBlog);
 
   return {
-    statusCode: 201,
+    statusCode: 204,
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Credentials': true,
     },
-    body: JSON.stringify({
-      uploadUrl: url,
-    }),
+    body: '',
   };
 };

@@ -1,6 +1,6 @@
 org: daomtthuan
-app: thuandmt-todo-app
-service: thuandmt-todo-app
+app: daomtthuan-blog-app
+service: daomtthuan-blog-app
 frameworkVersion: '3'
 
 plugins:
@@ -15,28 +15,24 @@ provider:
 
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
-  profile: serverless
+  profile: serverless-2
 
   tracing:
     lambda: true
     apiGateway: true
 
-  # Use these variables in the functions and resouorces section below. For example,
-  # ${self:provider.environment.ATTACHMENT_S3_BUCKET}
   environment:
-    TODOS_TABLE: thuandmt-todos-table-${self:provider.stage}
-    TODOS_CREATED_AT_INDEX: CreatedAtIndex
-    ATTACHMENT_S3_BUCKET: thuandmt-todo-images-bucket-${self:provider.stage}
+    BLOGS_TABLE: blog-table-${self:provider.stage}
+    BLOGS_CREATED_AT_INDEX: CreatedAtIndex
+    ATTACHMENT_S3_BUCKET: daomtthuan-blog-app-images-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
-    PROJECT_NAME: thuandmt-todo-app
-    INDEX_NAME: ${self:provider.environment.TODOS_CREATED_AT_INDEX}
+    PROJECT_NAME: daomtthuan-blog-app
+    INDEX_NAME: ${self:provider.environment.BLOGS_CREATED_AT_INDEX}
 
   logs:
-    # Enable API Gateway logs
     restApi: true
-
 custom:
-  topicName: thuandmt-todos-images-topic-${self:provider.stage}
+  topicName: daomtthuan-blog-app-images-topic-${self:provider.stage}
 
 functions:
   Auth:
@@ -48,78 +44,73 @@ functions:
           - xray:PutTraceSegments
         Resource: '*'
 
-  # Provide iamRoleStatements property for performing Actions on DynamoDB
-  GetTodos:
-    handler: src/lambda/http/getTodos.handler
+  GetBlogs:
+    handler: src/lambda/http/getBlogs.handler
     events:
       - http:
           method: get
-          path: todos
+          path: blogs
           cors: true
           authorizer: Auth
-    iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-get-todo-role-${self:provider.stage}
+    iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-get-blog-role-${self:provider.stage}
     iamRoleStatements:
       - Effect: Allow
         Action:
           - dynamodb:Query
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.BLOGS_TABLE}
       - Effect: Allow
         Action:
           - dynamodb:Query
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.TODOS_CREATED_AT_INDEX}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.BLOGS_TABLE}/index/${self:provider.environment.BLOGS_CREATED_AT_INDEX}
       - Effect: Allow
         Action:
           - xray:PutTraceSegments
         Resource:
           - '*'
 
-  # Provide iamRoleStatements property. Decide the Actions and AWS Resource.
-  # To refer to an AWS resource defined in the "Resources" section, you can use "Resource: !GetAtt <resource-name>.Arn"
-  # To validate incoming HTTP requests, we have provided the request schemas in function definition below.
-  CreateTodo:
-    handler: src/lambda/http/createTodo.handler
+  CreateBlog:
+    handler: src/lambda/http/createBlog.handler
     events:
       - http:
           method: post
-          path: todos
+          path: blogs
           cors: true
           authorizer: Auth
           request:
             schemas:
-              application/json: ${file(models/create-todo-model.json)}
-    iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-create-todo-role-${self:provider.stage}
+              application/json: ${file(models/create-blog-model.json)}
+    iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-create-blog-role-${self:provider.stage}
     iamRoleStatements:
       - Effect: Allow
         Action:
           - dynamodb:PutItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.BLOGS_TABLE}
       - Effect: Allow
         Action:
           - xray:PutTraceSegments
         Resource:
           - '*'
 
-  # Provide property for setting up CORS, Authorizer, iamRoleStatements, and request schemas
-  UpdateTodo:
-    handler: src/lambda/http/updateTodo.handler
+  UpdateBlog:
+    handler: src/lambda/http/updateBlog.handler
     events:
       - http:
           method: patch
-          path: todos/{todoId}
-          authorizer: Auth
+          path: blogs/{blogId}
           cors: true
+          authorizer: Auth
           request:
             schemas:
-              application/json: ${file(models/update-todo-model.json)}
+              application/json: ${file(models/update-blog-model.json)}
     iamRoleStatements:
       - Effect: Allow
         Action:
           - dynamodb:UpdateItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.BLOGS_TABLE}
       - Effect: Allow
         Action:
           - dynamodb:UpdateItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.INDEX_NAME}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.BLOGS_TABLE}/index/${self:provider.environment.INDEX_NAME}
       - Effect: Allow
         Action:
           - 'xray:PutTraceSegments'
@@ -127,20 +118,19 @@ functions:
         Resource:
           - '*'
 
-  # Provide property for setting up CORS, Authorizer, iamRoleStatements
-  DeleteTodo:
-    handler: src/lambda/http/deleteTodo.handler
+  DeleteBlog:
+    handler: src/lambda/http/deleteBlog.handler
     events:
       - http:
           method: delete
-          path: todos/{todoId}
+          path: blogs/{blogId}
           authorizer: Auth
           cors: true
     iamRoleStatements:
       - Effect: Allow
         Action:
           - dynamodb:DeleteItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.BLOGS_TABLE}
       - Effect: Allow
         Action:
           - 'xray:PutTraceSegments'
@@ -148,14 +138,13 @@ functions:
         Resource:
           - '*'
 
-  # Provide property for setting up CORS, Authorizer, iamRoleStatements
   GenerateUploadUrl:
     handler: src/lambda/http/generateUploadUrl.handler
     events:
       - http:
           method: post
           authorizer: Auth
-          path: todos/{todoId}/attachment
+          path: blogs/{blogId}/attachment
           cors: true
     iamRoleStatements:
       - Effect: Allow
@@ -166,7 +155,7 @@ functions:
       - Effect: Allow
         Action:
           - dynamodb:UpdateItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.BLOGS_TABLE}
       - Effect: Allow
         Action:
           - 'xray:PutTraceSegments'
@@ -174,10 +163,26 @@ functions:
         Resource:
           - '*'
 
+  SearchBlogs:
+    handler: src/lambda/http/searchBlog.handler
+    events:
+      - http:
+          method: get
+          authorizer: Auth
+          path: search
+          cors: true
+          request:
+            parameters:
+              querystrings:
+                key: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.BLOGS_TABLE}
+
 resources:
   Resources:
-    # Add necessary AWS resources. You will need at least the following AWS resources
-    # Feel free to change the names as you like.
     GatewayResponseDefault4XX:
       Type: AWS::ApiGateway::GatewayResponse
       Properties:
@@ -189,25 +194,25 @@ resources:
         RestApiId:
           Ref: ApiGatewayRestApi
 
-    TodosTable:
+    BlogsTable:
       Type: AWS::DynamoDB::Table
       Properties:
         AttributeDefinitions:
           - AttributeName: userId
             AttributeType: S
-          - AttributeName: todoId
+          - AttributeName: blogId
             AttributeType: S
           - AttributeName: createdAt
             AttributeType: S
         KeySchema:
           - AttributeName: userId
             KeyType: HASH
-          - AttributeName: todoId
+          - AttributeName: blogId
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
-        TableName: ${self:provider.environment.TODOS_TABLE}
+        TableName: ${self:provider.environment.BLOGS_TABLE}
         LocalSecondaryIndexes:
-          - IndexName: ${self:provider.environment.TODOS_CREATED_AT_INDEX}
+          - IndexName: ${self:provider.environment.BLOGS_CREATED_AT_INDEX}
             KeySchema:
               - AttributeName: userId
                 KeyType: HASH
@@ -216,7 +221,6 @@ resources:
             Projection:
               ProjectionType: ALL
 
-    # Do not forget to add the CorsConfiguration propoerty
     AttachmentsBucket:
       Type: AWS::S3::Bucket
       Properties:
@@ -240,7 +244,6 @@ resources:
                 - HEAD
               MaxAge: 300
 
-    # For cross referencing the name of the bucket, use "!Ref AttachmentsBucket"
     BucketPolicy:
       Type: AWS::S3::BucketPolicy
       Properties:
@@ -254,11 +257,13 @@ resources:
               Action: 's3:GetObject'
               Resource: 'arn:aws:s3:::${self:provider.environment.ATTACHMENT_S3_BUCKET}/*'
         Bucket: !Ref AttachmentsBucket
+
     ImagesTopic:
       Type: AWS::SNS::Topic
       Properties:
-        DisplayName: Todo Image bucket topic
+        DisplayName: Blog Image bucket topic
         TopicName: ${self:custom.topicName}
+
     SNSTopicPolicy:
       Type: AWS::SNS::TopicPolicy
       Properties:

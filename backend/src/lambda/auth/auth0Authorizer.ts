@@ -8,14 +8,13 @@ import { Jwt } from '../../auth/Jwt';
 import { JwtPayload } from '../../auth/JwtPayload';
 import { createLogger } from '../../utils/logger';
 
-const logger = createLogger('[Authorizer]');
+const logger = createLogger('auth');
 
 // JSON Web key set
 const jwksUrl = 'https://dev-e07f8djplbwxi7u6.us.auth0.com/.well-known/jwks.json';
 
-export async function handler(event: CustomAuthorizerEvent): Promise<CustomAuthorizerResult> {
-  logger.info('Authorizing user', event.authorizationToken);
-
+export const handler = async (event: CustomAuthorizerEvent): Promise<CustomAuthorizerResult> => {
+  logger.info('Authorizing a user', event.authorizationToken);
   try {
     const jwtToken = await verifyToken(event.authorizationToken);
     logger.info('User was authorized', jwtToken);
@@ -50,34 +49,33 @@ export async function handler(event: CustomAuthorizerEvent): Promise<CustomAutho
       },
     };
   }
-}
+};
 
 async function verifyToken(authHeader: string): Promise<JwtPayload> {
-  logger.info('--INTO VertifyToken Function--');
-
   const token = getToken(authHeader);
   const jwt: Jwt = decode(token, { complete: true }) as Jwt;
 
   const res = await Axios.get(jwksUrl);
   const keys = res.data.keys;
-  const signinKeys = keys.find((key) => key.kid === jwt.header.kid);
+  const signInKeys = keys.find((key: { kid: string }) => key.kid === jwt.header.kid);
 
-  logger.info('--SIGNIN Key--', signinKeys);
+  logger.info('--SIGNIN KEYS--', signInKeys);
 
-  if (!signinKeys) {
-    throw new Error('Key not found!');
+  if (!signInKeys) {
+    throw new Error('SignIn Keys not found!');
   }
 
   // Get pem data
-  const pemData = signinKeys.x5c[0];
+  const pemData = signInKeys.x5c[0];
+
   // Convert pem data to cert
   const cert = `-----BEGIN CERTIFICATE-----\n${pemData}\n-----END CERTIFICATE-----`;
-  // Verify toke
-  const verifyToken = verify(token, cert, { algorithms: ['RS256'] }) as JwtPayload;
 
-  logger.info('--VERIFY TOKEN--', verifyToken);
+  // Verify token
+  const verifiedToken = verify(token, cert, { algorithms: ['RS256'] }) as JwtPayload;
+  logger.info('-----VERIFY TOKEN------', verifiedToken);
 
-  return verifyToken;
+  return verifiedToken;
 }
 
 function getToken(authHeader: string): string {
@@ -87,6 +85,5 @@ function getToken(authHeader: string): string {
 
   const split = authHeader.split(' ');
   const token = split[1];
-
   return token;
 }

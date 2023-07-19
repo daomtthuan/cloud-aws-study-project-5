@@ -1,26 +1,24 @@
 import * as AWS from 'aws-sdk';
+import * as AWSXRay from 'aws-xray-sdk';
 
-const AWSXRay = require('aws-xray-sdk');
 const XAWS = AWSXRay.captureAWS(AWS);
 
+const attachmentS3Bucket = process.env.ATTACHMENT_S3_BUCKET;
+const signedUrlExpiration = process.env.SIGNED_URL_EPIRATION;
+
 export class AttachmentUtils {
-  private readonly s3: any; // There is not declare type of this library
+  constructor(private readonly s3 = new XAWS.S3({ signatureVersion: 'v4' }), private readonly bucketName = attachmentS3Bucket) {}
 
-  public constructor() {
-    this.s3 = new XAWS.S3({ signatureVersion: 'v4' });
+  getAttachmentUrl(fileId: string) {
+    return `https://${this.bucketName}.s3.amazonaws.com/${fileId}`;
   }
 
-  getAttachmentUrl(todoId: string) {
-    return `https://${process.env.ATTACHMENT_S3_BUCKET}.s3.amazonaws.com/${todoId}`;
-  }
-
-  getUploadUrl(todoId: string) {
+  getUploadUrl(fileId: string) {
     const url = this.s3.getSignedUrl('putObject', {
-      Bucket: process.env.ATTACHMENT_S3_BUCKET,
-      Key: todoId,
-      Expires: process.env.SIGNED_URL_EPIRATION,
+      Bucket: this.bucketName,
+      Key: fileId,
+      Expires: signedUrlExpiration,
     });
-
     return url as string;
   }
 }

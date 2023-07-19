@@ -1,13 +1,22 @@
 import React, { Component } from 'react';
 
-import { Link, Route, Router, Switch } from 'react-router-dom';
-import { Grid, Menu, Segment } from 'semantic-ui-react';
+import {
+  Link,
+  Route,
+  Router,
+  Switch,
+} from 'react-router-dom';
+import {
+  Grid,
+  Menu,
+  Segment,
+} from 'semantic-ui-react';
 
 import Auth from './auth/Auth';
-import { EditTodo } from './components/EditTodo';
+import { Blogs } from './components/Blogs';
+import { EditBlog } from './components/EditBlog';
 import { LogIn } from './components/LogIn';
 import { NotFound } from './components/NotFound';
-import { Todos } from './components/Todos';
 
 export interface AppProps {}
 
@@ -37,13 +46,12 @@ export default class App extends Component<AppProps, AppState> {
   render() {
     return (
       <div>
-        <Segment style={{ padding: '8em 0em' }} vertical>
+        <Segment style={{ padding: '10em 0em' }} vertical>
           <Grid container stackable verticalAlign="middle">
             <Grid.Row>
               <Grid.Column width={16}>
                 <Router history={this.props.history}>
                   {this.generateMenu()}
-
                   {this.generateCurrentPage()}
                 </Router>
               </Grid.Column>
@@ -93,15 +101,15 @@ export default class App extends Component<AppProps, AppState> {
           path="/"
           exact
           render={(props) => {
-            return <Todos {...props} auth={this.props.auth} />;
+            return <Blogs {...props} auth={this.props.auth} />;
           }}
         />
 
         <Route
-          path="/todos/:todoId/edit"
+          path="/blogs/:blogId/edit"
           exact
           render={(props) => {
-            return <EditTodo {...props} auth={this.props.auth} />;
+            return <EditBlog {...props} auth={this.props.auth} />;
           }}
         />
 
