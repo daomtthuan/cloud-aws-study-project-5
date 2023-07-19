@@ -5,8 +5,10 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { getUserTodos } from '../../businessLogic/todos';
 import { createLogger } from '../../utils/logger';
 
+const logger = createLogger('[GetTodo]');
+
 export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
-  createLogger('Processing event: ' + event);
+  logger.info('Handle: ' + event);
 
   const authorization = event.headers.Authorization;
   const split = authorization.split(' ');
@@ -16,10 +18,13 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Credentials': true,
   };
+  const data = {
+    items: result,
+  };
 
   return {
     statusCode: 200,
     headers,
-    body: JSON.stringify({ items: result }),
+    body: JSON.stringify(data),
   };
 }

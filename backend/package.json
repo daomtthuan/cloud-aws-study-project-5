@@ -1,5 +1,5 @@
 {
-  "name": "thuandmt-serverless-todo-app",
+  "name": "thuandmt-todo-app",
   "version": "1.0.0",
   "description": "Serverless TODO image app",
   "dependencies": {

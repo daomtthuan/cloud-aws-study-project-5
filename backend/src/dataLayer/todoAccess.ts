@@ -9,9 +9,7 @@ import { createLogger } from '../utils/logger';
 const AWSXRay = require('aws-xray-sdk');
 const XAWS = AWSXRay.captureAWS(AWS);
 
-const logger = createLogger('TodoAccess');
-
-const attachment = new AttachmentUtils();
+const logger = createLogger('[TodoAccess]');
 
 export class TodosAccess {
   private readonly docClient: DocumentClient;
@@ -20,6 +18,7 @@ export class TodosAccess {
     this.docClient = new XAWS.DynamoDB.DocumentClient();
   }
 
+  // Get all todos
   async getAllTodos(): Promise<TodoItem[]> {
     logger.info('getAllTodos called');
 
@@ -29,11 +28,12 @@ export class TodosAccess {
       })
       .promise();
 
-    const items = result.Items;
-    return items as TodoItem[];
+    logger.info('getAllTodos done', result);
+
+    return result.Items as TodoItem[];
   }
 
-  // Get Todos
+  // Get todos of user
   async getTodos(userId: string): Promise<TodoItem[]> {
     logger.info('getTodos called');
 
@@ -48,8 +48,9 @@ export class TodosAccess {
       })
       .promise();
 
-    const items = result.Items;
-    return items as TodoItem[];
+    logger.info('getTodos done', result);
+
+    return result.Items as TodoItem[];
   }
 
   // Create todo
@@ -62,15 +63,46 @@ export class TodosAccess {
         Item: todoItem,
       })
       .promise();
-    logger.info('Todo item created', result);
+
+    logger.info('createTodoItem done', result);
+
     return todoItem as TodoItem;
+  }
+
+  // Update todo
+  async updateTodo(userId: string, todoId: string, request: UpdateTodoRequest): Promise<void> {
+    logger.info('updateTodoAttachmentUrl called');
+
+    const expressionAttributes = {
+      ':name': request.name,
+      ':done': request.done,
+      ':dueDate': request.dueDate,
+    };
+    const updateExpression = 'set done = :done, dueDate= :dueDate, #n= :name';
+
+    const result = await this.docClient
+      .update({
+        TableName: process.env.TODOS_TABLE,
+        Key: {
+          userId: userId,
+          todoId: todoId,
+        },
+        UpdateExpression: updateExpression,
+        ExpressionAttributeValues: expressionAttributes,
+        ExpressionAttributeNames: {
+          '#n': 'name',
+        },
+      })
+      .promise();
+
+    logger.info('updateTodoAttachmentUrl done', result);
   }
 
   // Delete todo
   async deleteTodo(userId: string, todoId: string): Promise<boolean> {
     logger.info('deleteTodo called');
 
-    await this.docClient
+    const result = await this.docClient
       .delete({
         TableName: process.env.TODOS_TABLE,
         Key: {
@@ -79,40 +111,17 @@ export class TodosAccess {
         },
       })
       .promise();
+
+    logger.info('deleteTodo done', result);
+
     return true;
   }
 
-  // Update todo
-  async updateTodo(todoId: string, userId: string, updateTodoRequest: UpdateTodoRequest): Promise<void> {
-    logger.info('updateTodoAttachmentUrl called');
-
-    const expressionAttibutes = {
-      ':done': updateTodoRequest.done,
-      ':name': updateTodoRequest.name,
-      ':dueDate': updateTodoRequest.dueDate,
-    };
-    const updateExpression = 'set done = :done, dueDate= :dueDate, #n= :name';
-
-    await this.docClient
-      .update({
-        TableName: process.env.TODOS_TABLE,
-        Key: {
-          userId: userId,
-          todoId: todoId,
-        },
-        UpdateExpression: updateExpression,
-        ExpressionAttributeValues: expressionAttibutes,
-        ExpressionAttributeNames: {
-          '#n': 'name',
-        },
-      })
-      .promise();
-  }
-
   // Upload Image
-  async updateTodoAttachmentUrl(userId: string, todoId: string): Promise<void> {
+  async updateTodoAttachment(userId: string, todoId: string): Promise<void> {
     logger.info('updateTodoAttachmentUrl called');
 
+    const attachment = new AttachmentUtils();
     const s3AttachmentUrl = attachment.getAttachmentUrl(todoId);
     const dbTodoTable = process.env.TODOS_TABLE;
     const params = {
@@ -128,6 +137,8 @@ export class TodosAccess {
       ReturnValues: 'UPDATED_NEW',
     };
 
-    await this.docClient.update(params).promise();
+    const result = await this.docClient.update(params).promise();
+
+    logger.info('updateTodoAttachmentUrl done', result);
   }
 }

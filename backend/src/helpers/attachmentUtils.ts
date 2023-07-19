@@ -4,7 +4,7 @@ const AWSXRay = require('aws-xray-sdk');
 const XAWS = AWSXRay.captureAWS(AWS);
 
 export class AttachmentUtils {
-  private readonly s3;
+  private readonly s3: any; // There is not declare type of this library
 
   public constructor() {
     this.s3 = new XAWS.S3({ signatureVersion: 'v4' });
@@ -20,6 +20,7 @@ export class AttachmentUtils {
       Key: todoId,
       Expires: process.env.SIGNED_URL_EPIRATION,
     });
+
     return url as string;
   }
 }

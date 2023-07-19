@@ -6,8 +6,10 @@ import { deleteTodo } from '../../businessLogic/todos';
 import { createLogger } from '../../utils/logger';
 import { getUserId } from '../utils';
 
+const logger = createLogger('[DeleteTodo]');
+
 export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
-  createLogger('Processing event: ' + event);
+  logger.info('Handle: ' + event);
 
   const todoId = event.pathParameters.todoId;
   const userId = getUserId(event);
@@ -16,12 +18,13 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Credentials': true,
   };
+  const data = {
+    result,
+  };
 
   return {
     statusCode: 201,
     headers,
-    body: JSON.stringify({
-      result,
-    }),
+    body: JSON.stringify(data),
   };
 }

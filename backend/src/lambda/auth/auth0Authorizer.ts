@@ -8,7 +8,7 @@ import { Jwt } from '../../auth/Jwt';
 import { JwtPayload } from '../../auth/JwtPayload';
 import { createLogger } from '../../utils/logger';
 
-const logger = createLogger('Authorizer');
+const logger = createLogger('[Authorizer]');
 
 // JSON Web key set
 const jwksUrl = 'https://dev-e07f8djplbwxi7u6.us.auth0.com/.well-known/jwks.json';

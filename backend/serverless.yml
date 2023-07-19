@@ -1,6 +1,6 @@
 org: daomtthuan
-app: thuandmt-serverless-todo-app
-service: thuandmt-serverless-todo-app
+app: thuandmt-todo-app
+service: thuandmt-todo-app
 frameworkVersion: '3'
 
 plugins:
@@ -24,28 +24,19 @@ provider:
   # Use these variables in the functions and resouorces section below. For example,
   # ${self:provider.environment.ATTACHMENT_S3_BUCKET}
   environment:
-    TODOS_TABLE: Todos-${self:provider.stage}
+    TODOS_TABLE: thuandmt-todos-table-${self:provider.stage}
     TODOS_CREATED_AT_INDEX: CreatedAtIndex
-    ATTACHMENT_S3_BUCKET: thuandmt-serverless-c4-todo-images-${self:provider.stage}
+    ATTACHMENT_S3_BUCKET: thuandmt-todo-images-bucket-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
-    PROJECT_NAME: thuandmt-serverless-todo-app
+    PROJECT_NAME: thuandmt-todo-app
     INDEX_NAME: ${self:provider.environment.TODOS_CREATED_AT_INDEX}
 
   logs:
     # Enable API Gateway logs
     restApi: true
 
-  # iam:
-  #   role:
-  #     statements:
-  #       - Effect: Allow
-  #         Action:
-  #           - xray:PutTelemetryRecords
-  #           - xray:PutTraceSegments
-  #         Resource: '*'
-
 custom:
-  topicName: todos-imagesTopic-${self:provider.stage}
+  topicName: thuandmt-todos-images-topic-${self:provider.stage}
 
 functions:
   Auth:
