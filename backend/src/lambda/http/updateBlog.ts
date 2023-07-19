@@ -2,16 +2,21 @@ import 'source-map-support/register';
 
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { updateBlog } from '../../businessLogic/blog';
+import { updateBlog } from '../../businessLogicLayer/BlogLogic';
 import { UpdateBlogRequest } from '../../requests/UpdateBlogRequest';
+import { createLogger } from '../../utils/logger';
 import { getUserId } from '../utils';
 
-export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  const blogId = event.pathParameters.blogId;
-  const updatedBlog: UpdateBlogRequest = JSON.parse(event.body);
+const logger = createLogger('UpdateBlog');
+
+export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+  logger.info('UpdateBlog.handler');
 
   const userId = getUserId(event);
-  await updateBlog(blogId, userId, updatedBlog);
+  const blogId = event.pathParameters.blogId;
+  const updateBlogRequest: UpdateBlogRequest = JSON.parse(event.body);
+
+  await updateBlog(blogId, userId, updateBlogRequest);
 
   return {
     statusCode: 204,
@@ -19,6 +24,6 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Credentials': true,
     },
-    body: '',
+    body: 'Successfully',
   };
-};
+}

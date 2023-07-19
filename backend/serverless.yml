@@ -164,7 +164,7 @@ functions:
           - '*'
 
   SearchBlogs:
-    handler: src/lambda/http/searchBlog.handler
+    handler: src/lambda/http/searchBlogs.handler
     events:
       - http:
           method: get

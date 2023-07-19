@@ -6,8 +6,8 @@ import { CreateBlogRequest } from '../types/CreateBlogRequest';
 import { UpdateBlogRequest } from '../types/UpdateBlogRequest';
 
 // Search Blog
-export async function searchBlog(searchText: string, idToken: string): Promise<Blog[]> {
-  const response = await Axios.get(`${apiEndpoint}/search?key=${searchText}`, {
+export async function searchBlogs(searchText: string, idToken: string): Promise<Blog[]> {
+  const response = await Axios.get(`${apiEndpoint}/search?keyword=${searchText}`, {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${idToken}`,

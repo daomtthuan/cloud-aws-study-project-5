@@ -1,13 +1,17 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "create-todo",
+  "title": "create-blog",
   "type": "object",
   "properties": {
     "name": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 100,
+      "maxLength": 50,
       "default": "Untitled"
+    },
+    "content": {
+      "type": "string",
+      "maxLength": 200
     }
   },
   "required": ["name"],

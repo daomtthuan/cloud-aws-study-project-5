@@ -1,16 +1,7 @@
 import React, { Component } from 'react';
 
-import {
-  Link,
-  Route,
-  Router,
-  Switch,
-} from 'react-router-dom';
-import {
-  Grid,
-  Menu,
-  Segment,
-} from 'semantic-ui-react';
+import { Link, Route, Router, Switch } from 'react-router-dom';
+import { Grid, Menu, Segment } from 'semantic-ui-react';
 
 import Auth from './auth/Auth';
 import { Blogs } from './components/Blogs';
@@ -46,7 +37,7 @@ export default class App extends Component<AppProps, AppState> {
   render() {
     return (
       <div>
-        <Segment style={{ padding: '10em 0em' }} vertical>
+        <Segment style={{ padding: '2.5em 0em' }} vertical>
           <Grid container stackable verticalAlign="middle">
             <Grid.Row>
               <Grid.Column width={16}>

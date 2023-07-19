@@ -20,7 +20,7 @@ export class LogIn extends React.PureComponent<LogInProps, LogInState> {
       <div>
         <h1>Please log in</h1>
 
-        <Button onClick={this.onLogin} size="huge" color="olive">
+        <Button onClick={this.onLogin} size="huge" color="blue">
           Log in
         </Button>
       </div>

@@ -2,25 +2,29 @@ import 'source-map-support/register';
 
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { createBlog } from '../../businessLogic/blog';
+import { createBlog } from '../../businessLogicLayer/BlogLogic';
 import { CreateBlogRequest } from '../../requests/CreateBlogRequest';
+import { createLogger } from '../../utils/logger';
 import { getUserId } from '../utils';
 
-export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  const newBlog: CreateBlogRequest = JSON.parse(event.body);
+const logger = createLogger('CreateBlog');
+
+export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+  logger.info('CreateBlog.handler');
 
   const userId = getUserId(event);
-  const newUser = await createBlog(newBlog, userId);
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Credentials': true,
-  };
+  const createBlogRequest: CreateBlogRequest = JSON.parse(event.body);
+
+  const result = await createBlog(userId, createBlogRequest);
 
   return {
     statusCode: 201,
-    headers,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true,
+    },
     body: JSON.stringify({
-      item: newUser,
+      item: result,
     }),
   };
-};
+}

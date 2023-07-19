@@ -3,7 +3,7 @@ import * as React from 'react';
 import { History } from 'history';
 import { Button, Divider, Grid, Header, Icon, Image, Input, Loader } from 'semantic-ui-react';
 
-import { createBlog, deleteBlog, getBlogs, searchBlog } from '../api/blogs-api';
+import { createBlog, deleteBlog, getBlogs, searchBlogs } from '../api/blogs-api';
 import Auth from '../auth/Auth';
 import { Blog } from '../types/Blog';
 
@@ -39,7 +39,7 @@ export class Blogs extends React.PureComponent<BlogsProps, BlogsState> {
     if (searchKey === '') {
       data = await getBlogs(idToken);
     } else {
-      data = await searchBlog(searchKey, idToken);
+      data = await searchBlogs(searchKey, idToken);
     }
     this.setState({ blogs: data, loadingBlogs: false });
   };
@@ -82,6 +82,13 @@ export class Blogs extends React.PureComponent<BlogsProps, BlogsState> {
     }
   };
 
+  onImageError = ({ target }: Event) => {
+    if (!target) return;
+
+    (target as HTMLImageElement).onerror = null;
+    (target as HTMLImageElement).src = './Image_not_available.png';
+  };
+
   async componentDidMount() {
     try {
       const blogs = await getBlogs(this.props.auth.getIdToken());
@@ -97,11 +104,15 @@ export class Blogs extends React.PureComponent<BlogsProps, BlogsState> {
   render() {
     return (
       <div>
-        <Grid columns={2}>
+        <Grid columns={1}>
           <Grid.Row>
             <Grid.Column>
-              <Header as="h1">Blogs</Header>
+              <Header as="h1" textAlign="center" color="blue">
+                MY COLLECTIONS
+              </Header>
             </Grid.Column>
+          </Grid.Row>
+          <Grid.Row>
             <Grid.Column>
               <Input
                 action={{
@@ -109,7 +120,7 @@ export class Blogs extends React.PureComponent<BlogsProps, BlogsState> {
                   onClick: this.handleSearch,
                 }}
                 fluid
-                placeholder="Enter your search text..."
+                placeholder="Search blogs by name..."
                 onChange={this.handleSearchKeyChange}
               />
             </Grid.Column>
@@ -128,7 +139,7 @@ export class Blogs extends React.PureComponent<BlogsProps, BlogsState> {
         <Grid.Column width={16}>
           <Input
             action={{
-              color: 'green',
+              color: 'blue',
               labelPosition: 'left',
               icon: 'add',
               content: 'New blog',
@@ -136,7 +147,7 @@ export class Blogs extends React.PureComponent<BlogsProps, BlogsState> {
             }}
             fluid
             actionPosition="left"
-            placeholder="To change the world..."
+            placeholder="Blog name..."
             onChange={this.handleNameChange}
           />
         </Grid.Column>
@@ -159,7 +170,7 @@ export class Blogs extends React.PureComponent<BlogsProps, BlogsState> {
     return (
       <Grid.Row>
         <Loader indeterminate active inline="centered">
-          Loading BLOGs
+          Loading...
         </Loader>
       </Grid.Row>
     );
@@ -169,18 +180,14 @@ export class Blogs extends React.PureComponent<BlogsProps, BlogsState> {
     return (
       <Grid padded>
         <Grid.Row>
-          {/* <Grid.Column width={3} verticalAlign="middle">Select</Grid.Column> */}
           <Grid.Column width={4} verticalAlign="middle">
-            <b>Blog Name</b>
+            <b>Photo Name</b>
           </Grid.Column>
-          <Grid.Column width={4} verticalAlign="middle">
+          <Grid.Column width={6} verticalAlign="middle">
             <b>Image</b>
           </Grid.Column>
           <Grid.Column width={3} verticalAlign="middle">
-            <b>Start Date</b>
-          </Grid.Column>
-          <Grid.Column width={2} verticalAlign="middle">
-            <b>Duration (months)</b>
+            <b>Created At</b>
           </Grid.Column>
           <Grid.Column width={3} verticalAlign="middle">
             <b>Action</b>
@@ -192,17 +199,18 @@ export class Blogs extends React.PureComponent<BlogsProps, BlogsState> {
         {this.state.blogs.map((blog, pos) => {
           return (
             <Grid.Row key={blog.blogId}>
-              <Grid.Column width={4} verticalAlign="middle">
+              <Grid.Column width={4} verticalAlign="top">
                 {blog.name}
               </Grid.Column>
-              <Grid.Column width={4} verticalAlign="middle">
-                {blog.attachmentUrl && <Image src={blog.attachmentUrl} size="small" wrapped />}
+              <Grid.Column width={6} verticalAlign="middle">
+                {blog.attachmentUrl && <Image src={blog.attachmentUrl} size="medium" onError={this.onImageError} wrapped />}
               </Grid.Column>
-              <Grid.Column width={3} floated="right"></Grid.Column>
-              <Grid.Column width={2} floated="right"></Grid.Column>
-              <Grid.Column width={3} floated="right">
+              <Grid.Column width={3} verticalAlign="top" floated="right">
+                {new Date(blog.createdAt).toLocaleString()}
+              </Grid.Column>
+              <Grid.Column width={3} verticalAlign="top" floated="right">
                 <Button icon color="blue" onClick={() => this.onEditButtonClick(blog.blogId)}>
-                  <Icon name="pencil" />
+                  <Icon name="camera" />
                 </Button>
                 <Button icon color="red" onClick={() => this.onBlogDelete(blog.blogId)}>
                   <Icon name="delete" />

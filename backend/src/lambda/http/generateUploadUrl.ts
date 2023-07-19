@@ -2,14 +2,19 @@ import 'source-map-support/register';
 
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { createAttachmentUrl } from '../../businessLogic/blog';
+import { createAttachmentUrl } from '../../businessLogicLayer/BlogLogic';
+import { createLogger } from '../../utils/logger';
 import { getUserId } from '../utils';
 
-export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  const blogId = event.pathParameters.blogId;
+const logger = createLogger('GenerateUploadUrl');
+
+export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+  logger.info('GenerateUploadUrl.handler');
 
   const userId = getUserId(event);
-  const url = await createAttachmentUrl(userId, blogId);
+  const blogId = event.pathParameters.blogId;
+
+  const result = await createAttachmentUrl(userId, blogId);
 
   return {
     statusCode: 201,
@@ -18,7 +23,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       'Access-Control-Allow-Credentials': true,
     },
     body: JSON.stringify({
-      uploadUrl: url,
+      uploadUrl: result,
     }),
   };
-};
+}

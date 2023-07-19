@@ -2,14 +2,17 @@ import 'source-map-support/register';
 
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { getBlogs } from '../../businessLogic/blog';
+import { getBlogs } from '../../businessLogicLayer/BlogLogic';
 import { createLogger } from '../../utils/logger';
+import { getJwtToken } from '../utils';
 
-export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  createLogger('Get Blog event: ' + event);
-  const authorization = event.headers.Authorization;
-  const split = authorization.split(' ');
-  const jwtToken = split[1];
+const logger = createLogger('GetBlogs');
+
+export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+  logger.info('GetBlogs.handler');
+
+  const jwtToken = getJwtToken(event);
+
   const result = await getBlogs(jwtToken);
 
   return {
@@ -20,4 +23,4 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     },
     body: JSON.stringify({ items: result }),
   };
-};
+}

@@ -2,13 +2,18 @@ import 'source-map-support/register';
 
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { deleteBlog } from '../../businessLogic/blog';
+import { deleteBlog } from '../../businessLogicLayer/BlogLogic';
+import { createLogger } from '../../utils/logger';
 import { getUserId } from '../utils';
 
-export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  const blogId = event.pathParameters.blogId;
+const logger = createLogger('DeleteBlog');
+
+export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+  logger.info('DeleteBlog.handler');
 
   const userId = getUserId(event);
+  const blogId = event.pathParameters.blogId;
+
   const result = await deleteBlog(userId, blogId);
 
   return {
@@ -21,4 +26,4 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       result,
     }),
   };
-};
+}
