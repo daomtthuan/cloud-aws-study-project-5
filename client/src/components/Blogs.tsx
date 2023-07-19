@@ -62,6 +62,7 @@ export class Blogs extends React.PureComponent<BlogsProps, BlogsState> {
       const newBlog = await createBlog(this.props.auth.getIdToken(), {
         name: this.state.newBlogName,
       });
+
       this.setState({
         blogs: [...this.state.blogs, newBlog],
         newBlogName: '',

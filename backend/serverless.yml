@@ -174,7 +174,7 @@ functions:
           request:
             parameters:
               querystrings:
-                key: true
+                keyword: true
     iamRoleStatements:
       - Effect: Allow
         Action:

@@ -5,17 +5,6 @@ import { Blog } from '../types/Blog';
 import { CreateBlogRequest } from '../types/CreateBlogRequest';
 import { UpdateBlogRequest } from '../types/UpdateBlogRequest';
 
-// Search Blog
-export async function searchBlogs(searchText: string, idToken: string): Promise<Blog[]> {
-  const response = await Axios.get(`${apiEndpoint}/search?keyword=${searchText}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${idToken}`,
-    },
-  });
-  return response.data.items;
-}
-
 export async function getBlogs(idToken: string): Promise<Blog[]> {
   console.log('Fetching blogs');
 
@@ -69,4 +58,14 @@ export async function getUploadUrl(idToken: string, blogId: string): Promise<str
 
 export async function uploadFile(uploadUrl: string, file: Buffer): Promise<void> {
   await Axios.put(uploadUrl, file);
+}
+
+export async function searchBlogs(searchText: string, idToken: string): Promise<Blog[]> {
+  const response = await Axios.get(`${apiEndpoint}/search?keyword=${searchText}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${idToken}`,
+    },
+  });
+  return response.data.items;
 }

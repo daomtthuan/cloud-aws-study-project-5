@@ -1,8 +1,14 @@
 import * as React from 'react';
 
-import { Button, Form } from 'semantic-ui-react';
+import {
+  Button,
+  Form,
+} from 'semantic-ui-react';
 
-import { getUploadUrl, uploadFile } from '../api/blogs-api';
+import {
+  getUploadUrl,
+  uploadFile,
+} from '../api/blogs-api';
 import Auth from '../auth/Auth';
 
 enum UploadState {
@@ -72,7 +78,7 @@ export class EditBlog extends React.PureComponent<EditBlogProps, EditBlogState> 
   render() {
     return (
       <div>
-        <h1>Upload new image</h1>
+        <h1>Upload image</h1>
 
         <Form onSubmit={this.handleSubmit}>
           <Form.Field>
